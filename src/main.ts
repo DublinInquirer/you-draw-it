@@ -52,10 +52,10 @@ function ƒ() {
   };
 }
 
-var sel = d3.select("#graph").html("");
+var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
   parentSel: sel,
-  totalWidth: sel.node().offsetWidth,
+  totalWidth: sel.node()!.offsetWidth,
   height: 400,
   margin: { left: 50, right: 50, top: 30, bottom: 30 },
 });
@@ -69,11 +69,20 @@ c.svg
 c.x.domain([2000, 2021]);
 c.y.domain([0, 700]);
 
-c.xAxis.ticks(5).tickFormat(ƒ());
-c.yAxis.ticks(5).tickFormat((d) => d);
+c.xAxis.ticks(5).tickFormat((d) => d.toString());
+c.yAxis.ticks(5).tickFormat((d) => d.toString());
 
-var area = d3.area().x(ƒ("year", c.x)).y0(ƒ("deaths", c.y)).y1(c.height);
-var line = d3.area().x(ƒ("year", c.x)).y(ƒ("deaths", c.y));
+// var area = d3.area().x(ƒ("year", c.x)).y0(ƒ("deaths", c.y)).y1(c.height);
+
+var area = d3
+  .area<{ year: number; deaths: number }>()
+  .x((d) => c.x(d.year))
+  .y0((d) => c.y(d.deaths))
+  .y1(c.height);
+var line = d3
+  .area<{ year: number; deaths: number }>()
+  .x((d) => c.x(d.year))
+  .y((d) => c.y(d.deaths));
 
 var clipRect = c.svg
   .append("clipPath")
@@ -92,7 +101,7 @@ c.drawAxis();
 
 let yourData = data
   .map(function (d) {
-    return { year: d.year, deaths: d.deaths, defined: 0 };
+    return { year: d.year, deaths: d.deaths, defined: false };
   })
   .filter(function (d) {
     if (d.year == 2011) d.defined = true;

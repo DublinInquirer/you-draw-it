@@ -1,42 +1,118 @@
-export function conventions(c) {
-  c = c || {};
+import { ScaleLinear } from "d3";
+import { Axis, AxisDomain, AxisScale } from "d3-axis";
+import { Selection } from "d3-selection";
 
-  c.margin = c.margin || { top: 20, right: 20, bottom: 20, left: 20 };
+interface BaseParams {
+  margin: {
+    [key: string]: number;
+  };
+  parentSel?: Selection<HTMLElement, undefined, HTMLElement, undefined>;
+  rootsvg?: Selection<SVGSVGElement, undefined, HTMLElement, undefined>;
+  svg?: Selection<SVGGElement, undefined, HTMLElement, undefined>;
+  x?: ScaleLinear<number, number, never>;
+  y?: ScaleLinear<number, number, never>;
+  xAxis?: Axis<AxisDomain>;
+  yAxis?: Axis<AxisDomain>;
+}
+
+interface BaseParamsWithWidthHeight extends BaseParams {
+  width: number;
+  totalWidth?: never;
+  height: number;
+  totalHeight?: never;
+}
+
+interface BaseParamsWithWidthTotalHeight extends BaseParams {
+  width: number;
+  totalWidth?: never;
+  height?: never;
+  totalHeight: number;
+}
+
+interface BaseParamsWithTotalWidthHeight extends BaseParams {
+  width?: never;
+  totalWidth: number;
+  height: number;
+  totalHeight?: never;
+}
+
+interface BaseParamsWithTotalWidthTotalHeight extends BaseParams {
+  width?: never;
+  totalWidth: number;
+  height?: never;
+  totalHeight: number;
+}
+
+type Params =
+  | BaseParamsWithWidthHeight
+  | BaseParamsWithWidthTotalHeight
+  | BaseParamsWithTotalWidthHeight
+  | BaseParamsWithTotalWidthTotalHeight;
+
+// interface Out {
+//   margin: {
+//     [key: string]: number;
+//   };
+//   parentSel: Selection<HTMLElement, undefined, HTMLElement, undefined>;
+//   rootsvg: Selection<SVGSVGElement, undefined, HTMLElement, undefined>;
+//   svg: Selection<SVGGElement, undefined, HTMLElement, undefined>;
+//   x: AxisScale<AxisDomain>;
+//   y: AxisScale<AxisDomain>;
+//   xAxis: Axis<AxisDomain>;
+//   yAxis: Axis<AxisDomain>;
+// }
+
+export function conventions(c: Params) {
+  const margin = c.margin || { top: 20, right: 20, bottom: 20, left: 20 };
   ["top", "right", "bottom", "left"].forEach(function (d) {
-    if (!c.margin[d] && c.margin[d] != 0) c.margin[d] = 20;
+    if (!margin[d] && margin[d] != 0) margin[d] = 20;
   });
 
-  c.width = c.width || c.totalWidth - c.margin.left - c.margin.right || 900;
-  c.height = c.height || c.totalHeight - c.margin.top - c.margin.bottom || 460;
+  const width =
+    c.width || (c.totalWidth ? c.totalWidth - margin.left - margin.right : 900);
+  const height =
+    c.height ||
+    (c.totalHeight ? c.totalHeight - margin.top - margin.bottom : 460);
 
-  c.totalWidth = c.width + c.margin.left + c.margin.right;
-  c.totalHeight = c.height + c.margin.top + c.margin.bottom;
+  const totalWidth = width + c.margin.left + c.margin.right;
+  const totalHeight = height + c.margin.top + c.margin.bottom;
 
-  c.parentSel = c.parentSel || d3.select("body");
+  const parentSel = c.parentSel || d3.select("body");
 
-  c.rootsvg = c.parentSel.append("svg");
+  const rootsvg = parentSel.append("svg");
 
-  c.svg = c.rootsvg
-    .attr("width", c.totalWidth)
-    .attr("height", c.totalHeight)
+  const svg = rootsvg
+    .attr("width", totalWidth)
+    .attr("height", totalHeight)
     .append("g")
     .attr("transform", "translate(" + c.margin.left + "," + c.margin.top + ")");
 
-  c.x = c.x || d3.scaleLinear().range([0, c.width]);
-  c.y = c.y || d3.scaleLinear().range([c.height, 0]);
+  const x = c.x || d3.scaleLinear().range([0, width]);
+  const y = c.y || d3.scaleLinear().range([height, 0]);
 
-  c.xAxis = c.xAxis || d3.axisBottom().scale(c.x);
-  c.yAxis = c.yAxis || d3.axisLeft().scale(c.y);
+  const xAxis = c.xAxis || d3.axisBottom(x as AxisScale<AxisDomain>);
+  const yAxis = c.yAxis || d3.axisLeft(y as AxisScale<AxisDomain>);
 
-  c.drawAxis = function () {
-    c.svg
+  const drawAxis = function () {
+    svg
       .append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + c.height + ")")
-      .call(c.xAxis);
+      .call(xAxis);
 
-    c.svg.append("g").attr("class", "y axis").call(c.yAxis);
+    svg.append("g").attr("class", "y axis").call(yAxis);
   };
 
-  return c;
+  return {
+    width,
+    height,
+    parentSel,
+    rootsvg,
+    svg,
+    x,
+    y,
+    xAxis,
+    yAxis,
+    drawAxis,
+  };
 }
