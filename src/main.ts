@@ -26,36 +26,10 @@ var data = [
   { year: 2021, deaths: 137 },
 ];
 
-function ƒ() {
-  var functions = arguments;
-
-  //convert all string arguments into field accessors
-  var i = 0,
-    l = functions.length;
-  while (i < l) {
-    if (typeof functions[i] === "string" || typeof functions[i] === "number") {
-      functions[i] = (function (str) {
-        return function (d) {
-          return d[str];
-        };
-      })(functions[i]);
-    }
-    i++;
-  }
-
-  //return composition of functions
-  return function (d) {
-    var i = 0,
-      l = functions.length;
-    while (i++ < l) d = functions[i - 1].call(this, d);
-    return d;
-  };
-}
-
-var sel = d3.select("#graph").html("");
+var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
   parentSel: sel,
-  totalWidth: sel.node().offsetWidth,
+  totalWidth: sel.node()!.offsetWidth,
   height: 400,
   margin: { left: 50, right: 50, top: 30, bottom: 30 },
 });
@@ -69,11 +43,18 @@ c.svg
 c.x.domain([2000, 2021]);
 c.y.domain([0, 700]);
 
-c.xAxis.ticks(5).tickFormat(ƒ());
-c.yAxis.ticks(5).tickFormat((d) => d);
+c.xAxis.ticks(5).tickFormat((d) => d.toString());
+c.yAxis.ticks(5).tickFormat((d) => d.toString());
 
-var area = d3.area().x(ƒ("year", c.x)).y0(ƒ("deaths", c.y)).y1(c.height);
-var line = d3.area().x(ƒ("year", c.x)).y(ƒ("deaths", c.y));
+var area = d3
+  .area<{ year: number; deaths: number }>()
+  .x((d) => c.x(d.year))
+  .y0((d) => c.y(d.deaths))
+  .y1(c.height);
+var line = d3
+  .area<{ year: number; deaths: number; defined?: boolean }>()
+  .x((d) => c.x(d.year))
+  .y((d) => c.y(d.deaths));
 
 var clipRect = c.svg
   .append("clipPath")
@@ -92,7 +73,7 @@ c.drawAxis();
 
 let yourData = data
   .map(function (d) {
-    return { year: d.year, deaths: d.deaths, defined: 0 };
+    return { year: d.year, deaths: d.deaths, defined: false };
   })
   .filter(function (d) {
     if (d.year == 2011) d.defined = true;
@@ -101,8 +82,8 @@ let yourData = data
 
 var completed = false;
 
-var drag = d3.drag().on("drag", function () {
-  var pos = d3.mouse(this);
+var drag = d3.drag<SVGGElement, undefined>().on("drag", function (event) {
+  var pos = d3.pointer(event);
   var year = clamp(2009, 2021, c.x.invert(pos[0]));
   var deaths = clamp(0, c.y.domain()[1], c.y.invert(pos[1]));
 
@@ -113,9 +94,14 @@ var drag = d3.drag().on("drag", function () {
     }
   });
 
-  yourDataSel.attr("d", line.defined(ƒ("defined"))(yourData));
+  yourDataSel.attr("d", line.defined((d) => d.defined ?? false)(yourData));
 
-  if (!completed && d3.mean(yourData, ƒ("defined")) == 1) {
+  const allYourDataPointsDefined = yourData.reduce(
+    (acc, d) => acc && d.defined,
+    true
+  );
+
+  if (!completed && allYourDataPointsDefined) {
     completed = true;
     clipRect.transition().duration(1500).attr("width", c.x(2021));
   }
@@ -123,6 +109,6 @@ var drag = d3.drag().on("drag", function () {
 
 c.svg.call(drag);
 
-function clamp(a, b, c) {
+function clamp(a: number, b: number, c: number) {
   return Math.max(a, Math.min(b, c));
 }
