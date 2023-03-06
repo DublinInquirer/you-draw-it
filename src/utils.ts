@@ -49,19 +49,6 @@ type Params =
   | BaseParamsWithTotalWidthHeight
   | BaseParamsWithTotalWidthTotalHeight;
 
-// interface Out {
-//   margin: {
-//     [key: string]: number;
-//   };
-//   parentSel: Selection<HTMLElement, undefined, HTMLElement, undefined>;
-//   rootsvg: Selection<SVGSVGElement, undefined, HTMLElement, undefined>;
-//   svg: Selection<SVGGElement, undefined, HTMLElement, undefined>;
-//   x: AxisScale<AxisDomain>;
-//   y: AxisScale<AxisDomain>;
-//   xAxis: Axis<AxisDomain>;
-//   yAxis: Axis<AxisDomain>;
-// }
-
 export function conventions(c: Params) {
   const margin = c.margin || { top: 20, right: 20, bottom: 20, left: 20 };
   ["top", "right", "bottom", "left"].forEach(function (d) {
