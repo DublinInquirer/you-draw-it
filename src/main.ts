@@ -82,8 +82,11 @@ let yourData = data
 
 var completed = false;
 
-var drag = d3.drag<SVGGElement, undefined>().on("drag", function (event) {
-  var pos = d3.pointer(event);
+var drag = d3.drag<SVGGElement, any>().on("drag", function (event) {
+  const pos =
+    event.sourceEvent.constructor.name === "TouchEvent"
+      ? getTouchEventPosition(this, event.sourceEvent)
+      : d3.pointer(event);
   var year = clamp(2009, 2021, c.x.invert(pos[0]));
   var deaths = clamp(0, c.y.domain()[1], c.y.invert(pos[1]));
 
@@ -111,4 +114,25 @@ c.svg.call(drag);
 
 function clamp(a: number, b: number, c: number) {
   return Math.max(a, Math.min(b, c));
+}
+
+function getTouchEventPosition(node: SVGGElement, touchEvent: TouchEvent) {
+  const touchPoint = touchEvent.changedTouches[0];
+
+  const svg = node.ownerSVGElement;
+
+  if (svg && svg.createSVGPoint) {
+    const point = svg.createSVGPoint();
+    (point.x = touchPoint.clientX), (point.y = touchPoint.clientY);
+    const transformedPoint = point.matrixTransform(
+      node.getScreenCTM()?.inverse()
+    );
+    return [transformedPoint.x, transformedPoint.y];
+  }
+
+  const rect = node.getBoundingClientRect();
+  return [
+    touchPoint.clientX - rect.left - node.clientLeft,
+    touchPoint.clientY - rect.top - node.clientTop,
+  ];
 }
