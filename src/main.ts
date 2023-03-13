@@ -26,6 +26,9 @@ var data = [
   { x: 2021, y: 137 },
 ];
 
+const minY = 0;
+const maxY = 700;
+
 var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
   parentSel: sel,
@@ -40,8 +43,8 @@ c.svg
   .attr("height", c.height)
   .attr("opacity", 0);
 
-c.x.domain([2000, 2021]);
-c.y.domain([0, 700]);
+c.x.domain([data[0].x, data[data.length - 1].x]);
+c.y.domain([minY, maxY]);
 
 c.xAxis.ticks(5).tickFormat((d) => d.toString());
 c.yAxis.ticks(5).tickFormat((d) => d.toString());
@@ -60,7 +63,7 @@ var clipRect = c.svg
   .append("clipPath")
   .attr("id", "clip")
   .append("rect")
-  .attr("width", c.x(2011) - 2)
+  .attr("width", c.x(data[Math.floor(data.length / 2)].x) - 2)
   .attr("height", c.height);
 
 var correctSel = c.svg.append("g").attr("clip-path", "url(#clip)");
@@ -76,8 +79,8 @@ let yourData = data
     return { x: d.x, y: d.y, defined: false };
   })
   .filter(function (d) {
-    if (d.x == 2011) d.defined = true;
-    return d.x >= 2011;
+    if (d.x == data[Math.floor(data.length / 2)].x) d.defined = true;
+    return d.x >= data[Math.floor(data.length / 2)].x;
   });
 
 var completed = false;
@@ -87,7 +90,11 @@ var drag = d3.drag<SVGGElement, any>().on("drag", function (event) {
     event.sourceEvent.constructor.name === "TouchEvent"
       ? getTouchEventPosition(this, event.sourceEvent)
       : d3.pointer(event);
-  var x = clamp(2009, 2021, c.x.invert(pos[0]));
+  var x = clamp(
+    data[Math.ceil(data.length / 2)].x,
+    data[data.length - 1].x,
+    c.x.invert(pos[0])
+  );
   var y = clamp(0, c.y.domain()[1], c.y.invert(pos[1]));
 
   yourData.forEach(function (d) {
@@ -106,7 +113,10 @@ var drag = d3.drag<SVGGElement, any>().on("drag", function (event) {
 
   if (!completed && allYourDataPointsDefined) {
     completed = true;
-    clipRect.transition().duration(1500).attr("width", c.x(2021));
+    clipRect
+      .transition()
+      .duration(1500)
+      .attr("width", c.x(data[data.length - 1].x));
   }
 });
 
