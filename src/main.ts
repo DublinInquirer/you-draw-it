@@ -2,28 +2,28 @@ import { conventions } from "./utils";
 import "./style.css";
 
 var data = [
-  { year: 2000, deaths: 415 },
-  { year: 2001, deaths: 411 },
-  { year: 2002, deaths: 376 },
-  { year: 2003, deaths: 335 },
-  { year: 2004, deaths: 374 },
-  { year: 2005, deaths: 396 },
-  { year: 2006, deaths: 365 },
-  { year: 2007, deaths: 338 },
-  { year: 2008, deaths: 279 },
-  { year: 2009, deaths: 238 },
-  { year: 2010, deaths: 212 },
-  { year: 2011, deaths: 186 },
-  { year: 2012, deaths: 163 },
-  { year: 2013, deaths: 188 },
-  { year: 2014, deaths: 192 },
-  { year: 2015, deaths: 162 },
-  { year: 2016, deaths: 182 },
-  { year: 2017, deaths: 154 },
-  { year: 2018, deaths: 135 },
-  { year: 2019, deaths: 140 },
-  { year: 2020, deaths: 147 },
-  { year: 2021, deaths: 137 },
+  { x: 2000, y: 415 },
+  { x: 2001, y: 411 },
+  { x: 2002, y: 376 },
+  { x: 2003, y: 335 },
+  { x: 2004, y: 374 },
+  { x: 2005, y: 396 },
+  { x: 2006, y: 365 },
+  { x: 2007, y: 338 },
+  { x: 2008, y: 279 },
+  { x: 2009, y: 238 },
+  { x: 2010, y: 212 },
+  { x: 2011, y: 186 },
+  { x: 2012, y: 163 },
+  { x: 2013, y: 188 },
+  { x: 2014, y: 192 },
+  { x: 2015, y: 162 },
+  { x: 2016, y: 182 },
+  { x: 2017, y: 154 },
+  { x: 2018, y: 135 },
+  { x: 2019, y: 140 },
+  { x: 2020, y: 147 },
+  { x: 2021, y: 137 },
 ];
 
 var sel = d3.select<HTMLElement, undefined>("#graph").html("");
@@ -47,14 +47,14 @@ c.xAxis.ticks(5).tickFormat((d) => d.toString());
 c.yAxis.ticks(5).tickFormat((d) => d.toString());
 
 var area = d3
-  .area<{ year: number; deaths: number }>()
-  .x((d) => c.x(d.year))
-  .y0((d) => c.y(d.deaths))
+  .area<{ x: number; y: number }>()
+  .x((d) => c.x(d.x))
+  .y0((d) => c.y(d.y))
   .y1(c.height);
 var line = d3
-  .area<{ year: number; deaths: number; defined?: boolean }>()
-  .x((d) => c.x(d.year))
-  .y((d) => c.y(d.deaths));
+  .area<{ x: number; y: number; defined?: boolean }>()
+  .x((d) => c.x(d.x))
+  .y((d) => c.y(d.y));
 
 var clipRect = c.svg
   .append("clipPath")
@@ -73,11 +73,11 @@ c.drawAxis();
 
 let yourData = data
   .map(function (d) {
-    return { year: d.year, deaths: d.deaths, defined: false };
+    return { x: d.x, y: d.y, defined: false };
   })
   .filter(function (d) {
-    if (d.year == 2011) d.defined = true;
-    return d.year >= 2011;
+    if (d.x == 2011) d.defined = true;
+    return d.x >= 2011;
   });
 
 var completed = false;
@@ -87,12 +87,12 @@ var drag = d3.drag<SVGGElement, any>().on("drag", function (event) {
     event.sourceEvent.constructor.name === "TouchEvent"
       ? getTouchEventPosition(this, event.sourceEvent)
       : d3.pointer(event);
-  var year = clamp(2009, 2021, c.x.invert(pos[0]));
-  var deaths = clamp(0, c.y.domain()[1], c.y.invert(pos[1]));
+  var x = clamp(2009, 2021, c.x.invert(pos[0]));
+  var y = clamp(0, c.y.domain()[1], c.y.invert(pos[1]));
 
   yourData.forEach(function (d) {
-    if (Math.abs(d.year - year) < 0.5) {
-      d.deaths = deaths;
+    if (Math.abs(d.x - x) < 0.5) {
+      d.y = y;
       d.defined = true;
     }
   });
