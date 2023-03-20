@@ -1,30 +1,24 @@
 import { conventions } from "./utils";
 import "./style.css";
 
-var data = [
-  { x: 2000, y: 415 },
-  { x: 2001, y: 411 },
-  { x: 2002, y: 376 },
-  { x: 2003, y: 335 },
-  { x: 2004, y: 374 },
-  { x: 2005, y: 396 },
-  { x: 2006, y: 365 },
-  { x: 2007, y: 338 },
-  { x: 2008, y: 279 },
-  { x: 2009, y: 238 },
-  { x: 2010, y: 212 },
-  { x: 2011, y: 186 },
-  { x: 2012, y: 163 },
-  { x: 2013, y: 188 },
-  { x: 2014, y: 192 },
-  { x: 2015, y: 162 },
-  { x: 2016, y: 182 },
-  { x: 2017, y: 154 },
-  { x: 2018, y: 135 },
-  { x: 2019, y: 140 },
-  { x: 2020, y: 147 },
-  { x: 2021, y: 137 },
-];
+/* Test URL:
+ * http://localhost:5173/?x=2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021&y=415,411,376,335,374,396,365,338,279,238,212,186,163,188,192,162,182,154,135,140,147,137
+ */
+
+const params = new URLSearchParams(document.location.search);
+const xAxis = params
+  .get("x")
+  ?.split(",")
+  .map((xAxisEntry) => parseInt(xAxisEntry));
+const yAxis = params
+  .get("y")
+  ?.split(",")
+  .map((yAxisEntry) => parseFloat(yAxisEntry));
+
+const data = (xAxis ?? []).map((xAxisEntry, index) => ({
+  x: xAxisEntry,
+  y: yAxis?.[index] ?? 0,
+}));
 
 const minY = 0;
 const maxY = 700;
