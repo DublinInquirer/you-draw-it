@@ -21,7 +21,7 @@ const data = (xAxis ?? []).map((xAxisEntry, index) => ({
 }));
 
 const minY = 0;
-const maxY = 700;
+const maxY = Math.max(...(yAxis ?? [])) * 1.1;
 
 var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
