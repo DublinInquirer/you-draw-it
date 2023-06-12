@@ -6,6 +6,12 @@ import "./style.css";
  */
 
 const params = new URLSearchParams(document.location.search);
+
+const graphTitleElement = document.getElementById("graph-title");
+if (graphTitleElement) {
+  graphTitleElement.innerText = params.get("title") ?? "";
+}
+
 const xAxis = params
   .get("x")
   ?.split(",")
