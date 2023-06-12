@@ -89,7 +89,7 @@ var drag = d3.drag<SVGGElement, any>().on("drag", function (event) {
   const pos =
     event.sourceEvent.constructor.name === "TouchEvent"
       ? getTouchEventPosition(this, event.sourceEvent)
-      : d3.pointer(event);
+      : getMouseEventPosition(this, event.sourceEvent);
   var x = clamp(
     data[Math.ceil(data.length / 2)].x,
     data[data.length - 1].x,
@@ -144,5 +144,24 @@ function getTouchEventPosition(node: SVGGElement, touchEvent: TouchEvent) {
   return [
     touchPoint.clientX - rect.left - node.clientLeft,
     touchPoint.clientY - rect.top - node.clientTop,
+  ];
+}
+
+function getMouseEventPosition(node: SVGGElement, mouseEvent: MouseEvent) {
+  const svg = node.ownerSVGElement;
+
+  if (svg && svg.createSVGPoint) {
+    const point = svg.createSVGPoint();
+    (point.x = mouseEvent.clientX), (point.y = mouseEvent.clientY);
+    const transformedPoint = point.matrixTransform(
+      node.getScreenCTM()?.inverse()
+    );
+    return [transformedPoint.x, transformedPoint.y];
+  }
+
+  const rect = node.getBoundingClientRect();
+  return [
+    mouseEvent.clientX - rect.left - node.clientLeft,
+    mouseEvent.clientY - rect.top - node.clientTop,
   ];
 }
