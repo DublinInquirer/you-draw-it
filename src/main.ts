@@ -27,7 +27,7 @@ var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
   parentSel: sel,
   totalWidth: sel.node()!.offsetWidth,
-  height: 400,
+  height: params.get("height") ? parseInt(params.get("height") ?? "200") : 200,
   margin: { left: 50, right: 50, top: 30, bottom: 30 },
 });
 
