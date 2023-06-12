@@ -1,0 +1,19 @@
+name: Build and publish to GitHub Pages
+on: [push]
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm run build
+      - run: cp -r dist _site
+      - name: Upload
+        uses: actions/upload-pages-artifact@v1
+      - name: Deploy
+        uses: actions/deploy-pages@v1
