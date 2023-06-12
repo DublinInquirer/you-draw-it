@@ -1,7 +1,7 @@
 name: Build and publish to GitHub Pages
 on: [push]
 jobs:
-  build-publish:
+  build-upload:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -15,5 +15,16 @@ jobs:
       - run: cp -r dist _site
       - name: Upload
         uses: actions/upload-pages-artifact@v1
-      - name: Deploy
-        uses: actions/deploy-pages@v1
+  deploy:
+    needs: build-upload
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
