@@ -27,7 +27,10 @@ const data = (xAxis ?? []).map((xAxisEntry, index) => ({
 }));
 
 const minY = 0;
-const maxY = Math.max(...(yAxis ?? [])) * 1.1;
+const maxYParam = params.get("maxY");
+const maxY = maxYParam
+  ? parseFloat(maxYParam)
+  : Math.max(...(yAxis ?? [])) * 1.1;
 
 var sel = d3.select<HTMLElement, undefined>("#graph").html("");
 var c = conventions({
