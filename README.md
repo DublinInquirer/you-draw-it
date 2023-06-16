@@ -2,6 +2,8 @@
 
 An interactive chart that lets readers guess the trend
 
+https://github.com/DublinInquirer/you-draw-it/assets/456562/62c42b0c-6374-4a9f-b571-f7def1d454fd
+
 ## Credits
 
 This project is heaviliy inspired by The New York Times' series of _You Draw It_ quizzes. Massive thanks to [Adam Pearce](https://twitter.com/adamrpearce) and [Benoît Furic](https://github.com/BenoitFuric) for their example code and to [Claudia Dalby](https://twitter.com/claudiadalby) for suggesting this project.
